@@ -36,7 +36,19 @@ Or install it yourself as:
 
 ## Usage
 
+### Options
+You can init new meter object with following arguments:
 
+```ruby
+my_meter = Perforator::Meter.new(
+  name: 'your label', # -> meter name, just label for passing in start line # =======> your label
+  logger: Logger.new('my_logger.log'), # -> logger object, will receive :info at each step
+  puts: true, # -> true/false output to STDOUT
+  expected_time: 10, # -> time in seconds (!) that expected for execution
+  positive_callback: proc { puts ':)' }, # -> executed if real execution less than expected
+  negative_callback: proc { puts ':(' } # -> executed if real execution more than expected
+)
+```
 
 ## Development
 

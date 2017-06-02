@@ -87,6 +87,7 @@ module Perforator
       expected_time.nil? || expected_time.is_a?(Fixnum)
     end
 
+    # TODO Add possibility to log method_missing keys
     # def method_missing(meth, *args, &blk)
     #   log!("#{meth}: #{args[0]}")
     # end
