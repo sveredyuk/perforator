@@ -20,7 +20,23 @@ RSpec.describe Perforator::Meter do
     )
   end
 
-  describe '.initialize' do
+  def default_loggger_and_puts_messages_receiving
+    expect(logger).to receive(:info).with("=======> #{name}").once
+    expect(STDOUT).to receive(:puts).with("=======> #{name}").once
+
+    expect(logger).to receive(:info).with(/Start:/).once
+    expect(STDOUT).to receive(:puts).with(/Start:/).once
+
+    expect(logger).to receive(:info).with(/Finish:/).once
+    expect(STDOUT).to receive(:puts).with(/Finish:/).once
+
+    expect(logger).to receive(:info).with(/Spent:/).once
+    expect(STDOUT).to receive(:puts).with(/Spent:/).once
+
+    expect(STDOUT).to receive(:puts).with(execution_message).once
+  end
+
+  describe '.new' do
     it { expect(meter.name).to              eq name }
     it { expect(meter.logger).to            eq logger }
     it { expect(meter.expected_time).to     eq expected_time }
@@ -53,24 +69,8 @@ RSpec.describe Perforator::Meter do
     end
   end
 
-  describe '.call' do
+  describe '#call' do
     context 'all options' do
-      def default_loggger_and_puts_messages_receiving
-        expect(logger).to receive(:info).with(/Start:/).once
-        expect(STDOUT).to receive(:puts).with(/Start:/).once
-
-        expect(logger).to receive(:info).with("=======> #{name}").once
-        expect(STDOUT).to receive(:puts).with("=======> #{name}").once
-
-        expect(logger).to receive(:info).with(/Finish:/).once
-        expect(STDOUT).to receive(:puts).with(/Finish:/).once
-
-        expect(logger).to receive(:info).with(/Spent:/).once
-        expect(STDOUT).to receive(:puts).with(/Spent:/).once
-
-        expect(STDOUT).to receive(:puts).with(execution_message).once
-      end
-
       let(:execute_meter) do
         meter.call do
           puts execution_message
@@ -130,6 +130,26 @@ RSpec.describe Perforator::Meter do
 
         execute_simple_meter
       end
+    end
+  end
+
+  describe '#method_missing' do
+    let(:meter_with_custome_methods) do
+      described_class.new(name: name, logger: logger, puts: true).call do |m|
+        meter.some_start 'Value'
+        puts execution_message
+        meter.some_finish 'Value'
+      end
+    end
+
+    it 'adds missing methods to log and STDOUT' do
+      default_loggger_and_puts_messages_receiving
+      expect(logger).to receive(:info).with(/some_start: Value/).once
+      expect(STDOUT).to receive(:puts).with(/some_start: Value/).once
+      expect(logger).to receive(:info).with(/some_finish: Value/).once
+      expect(STDOUT).to receive(:puts).with(/some_finish: Value/).once
+
+      meter_with_custome_methods
     end
   end
 end

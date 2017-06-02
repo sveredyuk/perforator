@@ -52,6 +52,49 @@ my_meter = Perforator::Meter.new(
 )
 ```
 
+
+You can skip any option if you don't need it.
+
+But for callbacks :expected_time is necessary:
+```ruby
+Perforator::Meter.new(positive_callback: -> { puts ':)' }) #=> NoExpectedTimeError
+```
+
+Callbacks must be callable:
+```ruby
+Perforator::Meter.new(positive_callback: Hash.new) #=> NotCallableCallbackError
+
+```
+
+Expeted time must be fixnum:
+```ruby
+Perforator::Meter.new(expected_time: '10') #=> NotFixnumExpectedTimeError
+
+```
+
+Just wrap your code with meter:
+```ruby
+my_meter.call do
+  # put your code here
+end
+```
+
+Any of undefined method for meter will be added to output and log. It helps to add some custom breakpoints:
+```ruby
+my_meter.call do |meter|
+  meter.some_start 'Value'
+  # put your code here
+  meter.some_finish 'Valud'
+end
+
+# =======> your label
+# some_start: Value
+# Start: 2017-06-02 14:24:53 +0300
+# Finish: 2017-06-02 14:24:54 +0300
+# Spent: 1.000919
+# some_finish Value
+```
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.

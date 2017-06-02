@@ -88,8 +88,8 @@ module Perforator
     end
 
     # TODO Add possibility to log method_missing keys
-    # def method_missing(meth, *args, &blk)
-    #   log!("#{meth}: #{args[0]}")
-    # end
+    def method_missing(meth, *args, &blk)
+      log!("#{meth}: #{args[0]}")
+    end
   end
 end
