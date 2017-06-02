@@ -1,3 +1,5 @@
+https://travis-ci.org/sveredyuk/perforator.svg?branch=master
+
 # Perforator
 
 ### Simple and pretty stupid way to measure execution time of your code
