@@ -57,10 +57,10 @@ module Perforator
     def execute_callbacks!
       return unless expected_time
 
-      if spent_time < expected_time
+      if spent_time < expected_time && positive_callback
         log! "Spent time less than exepcted. Executing: #{positive_callback.inspect}"
         positive_callback.call
-      else
+      elsif spent_time > expected_time && negative_callback
         log! "Spent time more than exepcted. Executing: #{positive_callback.inspect}"
         negative_callback.call
       end
