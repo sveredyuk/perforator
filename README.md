@@ -79,20 +79,20 @@ my_meter.call do
 end
 ```
 
-Any of undefined method for meter will be added to output and log. It helps to add some custom breakpoints:
+Use `log!` method to log additional info
 ```ruby
 my_meter.call do |meter|
-  meter.some_start 'Value'
+  meter.log! 'Any start value'
   # put your code here
-  meter.some_finish 'Valud'
+  meter.some_finish 'Some finish value'
 end
 
 # =======> your label
-# some_start: Value
+# Any start value
 # Start: 2017-06-02 14:24:53 +0300
 # Finish: 2017-06-02 14:24:54 +0300
 # Spent: 1.000919
-# some_finish Value
+# Some finish value
 ```
 
 ## Development

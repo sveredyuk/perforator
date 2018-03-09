@@ -21,19 +21,21 @@ RSpec.describe Perforator::Meter do
   end
 
   def default_loggger_and_puts_messages_receiving
-    expect(logger).to receive(:info).with("=======> #{name}").once
-    expect(STDOUT).to receive(:puts).with("=======> #{name}").once
+    aggregate_failures do
+      expect(logger).to receive(:info).with("=======> #{name}").once
+      expect(STDOUT).to receive(:puts).with("=======> #{name}").once
 
-    expect(logger).to receive(:info).with(/Start:/).once
-    expect(STDOUT).to receive(:puts).with(/Start:/).once
+      expect(logger).to receive(:info).with(/Start:/).once
+      expect(STDOUT).to receive(:puts).with(/Start:/).once
 
-    expect(logger).to receive(:info).with(/Finish:/).once
-    expect(STDOUT).to receive(:puts).with(/Finish:/).once
+      expect(logger).to receive(:info).with(/Finish:/).once
+      expect(STDOUT).to receive(:puts).with(/Finish:/).once
 
-    expect(logger).to receive(:info).with(/Spent:/).once
-    expect(STDOUT).to receive(:puts).with(/Spent:/).once
+      expect(logger).to receive(:info).with(/Spent:/).once
+      expect(STDOUT).to receive(:puts).with(/Spent:/).once
 
-    expect(STDOUT).to receive(:puts).with(execution_message).once
+      expect(STDOUT).to receive(:puts).with(execution_message).once
+    end
   end
 
   describe '.new' do
@@ -123,33 +125,38 @@ RSpec.describe Perforator::Meter do
       end
 
       it 'not touch anything' do
-        expect(logger).to_not receive(:info).with(execution_message)
-        expect(STDOUT).to receive(:puts).with(execution_message).once
-        expect(negative_callback).to_not receive(:call)
-        expect(positive_callback).to_not receive(:call)
+        aggregate_failures do
+          expect(logger).to_not receive(:info).with(execution_message)
+          expect(STDOUT).to receive(:puts).with(execution_message).once
+          expect(negative_callback).to_not receive(:call)
+          expect(positive_callback).to_not receive(:call)
+        end
 
         execute_simple_meter
       end
     end
   end
 
-  describe '#method_missing' do
-    let(:meter_with_custome_methods) do
+  describe '#log!' do
+    let(:meter_with_additional_logs) do
       described_class.new(name: name, logger: logger, puts: true).call do |m|
-        meter.some_start 'Value'
+        m.log!('Some start value')
         puts execution_message
-        meter.some_finish 'Value'
+        m.log!('Some finish value')
       end
     end
 
     it 'adds missing methods to log and STDOUT' do
       default_loggger_and_puts_messages_receiving
-      expect(logger).to receive(:info).with(/some_start: Value/).once
-      expect(STDOUT).to receive(:puts).with(/some_start: Value/).once
-      expect(logger).to receive(:info).with(/some_finish: Value/).once
-      expect(STDOUT).to receive(:puts).with(/some_finish: Value/).once
 
-      meter_with_custome_methods
+      aggregate_failures do
+        expect(logger).to receive(:info).with('Some start value').once
+        expect(STDOUT).to receive(:puts).with('Some start value').once
+        expect(logger).to receive(:info).with('Some finish value').once
+        expect(STDOUT).to receive(:puts).with('Some finish value').once
+      end
+
+      meter_with_additional_logs
     end
   end
 end

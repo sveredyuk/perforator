@@ -12,7 +12,7 @@ module Perforator
     def initialize(options = {})
       @name              = options.fetch(:name,              nil)
       @logger            = options.fetch(:logger,            nil)
-      @puts              = options.fetch(:puts,            false)
+      @process_puts      = options.fetch(:puts,            false)
       @expected_time     = options.fetch(:expected_time,     nil)
       @positive_callback = options.fetch(:positive_callback, nil)
       @negative_callback = options.fetch(:negative_callback, nil)
@@ -30,11 +30,20 @@ module Perforator
       finish
     end
 
-    def puts?
-      @puts
+    def log!(content)
+      log_items << content
     end
 
     private
+
+    attr_reader :process_puts
+
+    alias_method :process_puts?, :process_puts
+    alias_method :process_logger?, :logger
+
+    def log_items
+      @log_items ||= []
+    end
 
     def start
       log! "=======> #{name}"
@@ -52,6 +61,7 @@ module Perforator
       log! "Spent: #{spent_time}"
 
       execute_callbacks!
+      release_logs!
     end
 
     def execute_callbacks!
@@ -61,14 +71,16 @@ module Perforator
         log! "Spent time less than exepcted. Executing: #{positive_callback.inspect}"
         positive_callback.call
       elsif spent_time > expected_time && negative_callback
-        log! "Spent time more than exepcted. Executing: #{positive_callback.inspect}"
+        log! "Spent time more than exepcted. Executing: #{negative_callback.inspect}"
         negative_callback.call
       end
     end
 
-    def log!(content)
-      puts(content)        if puts?
-      logger.info(content) if logger
+    def release_logs!
+      log_items.each do |log_item|
+        puts(log_item)        if process_puts?
+        logger.info(log_item) if process_logger?
+      end
     end
 
     def callbacks_without_expected_time?
@@ -85,11 +97,6 @@ module Perforator
 
     def expected_time_valid?
       expected_time.nil? || expected_time.is_a?(Fixnum)
-    end
-
-    # TODO Add possibility to log method_missing keys
-    def method_missing(meth, *args, &blk)
-      log!("#{meth}: #{args[0]}")
     end
   end
 end
